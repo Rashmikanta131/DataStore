@@ -7,7 +7,6 @@ pipeline {
 
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub')
-        SONAR_SCANNER_HOME = tool 'sonar-scanner'
     }
 
     stages {
@@ -41,6 +40,9 @@ pipeline {
 
         stage("SonarQube Analysis") {
             agent any
+            environment {
+                SONAR_SCANNER_HOME = tool 'sonar-scanner'
+            }
             steps {
                 withSonarQubeEnv('sonarqube-server') {
                     sh '''
