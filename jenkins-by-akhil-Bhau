@@ -17,7 +17,7 @@ pipeline {
             agent any
             steps {
                 echo "-------- Cloning Repository --------"
-                git branch: 'master', url: 'https://github.com/Rashmikanta131/DataStore.git'
+                git branch: 'master', url: 'https://github.com/Rashmikanta131/datastore.git'
             }
         }
 
@@ -51,7 +51,7 @@ pipeline {
                         echo "-------- Running SonarQube Analysis --------"
                         $SONAR_SCANNER_HOME/bin/sonar-scanner \
                             -Dsonar.projectKey=datastore \
-                            -Dsonar.projectName=DataStore \
+                            -Dsonar.projectName=datastore \
                             -Dsonar.sources=src/main/java \
                             -Dsonar.java.binaries=target/classes \
                             -Dsonar.tests=src/test/java \
