@@ -6,7 +6,9 @@ pipeline {
     }
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub')
+        AWS_ACCOUNT_ID = '362570697704'
+        AWS_REGION = 'ap-south-1'
+        ECR_REPO = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/datastore"
     }
 
     stages {
@@ -63,7 +65,7 @@ pipeline {
         stage("SonarQube Quality Gate") {
             agent none
             steps {
-                timeout(time: 5, unit: 'MINUTES') {
+                timeout(time: 10, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
             }
@@ -108,22 +110,22 @@ pipeline {
                 stage("Docker Tag") {
                     steps {
                         sh '''
-                            echo "-------- Tagging Image --------"
-                            docker tag datastore:${App_Version} rashmikanta/datastore:${App_Version}
+                            echo "-------- Tagging Image for ECR --------"
+                            docker tag datastore:${App_Version} ${ECR_REPO}:${App_Version}
                             echo "-------- Tagging Complete --------"
                         '''
                     }
                 }
 
-                stage("Docker Login & Push") {
+                stage("ECR Login & Push") {
                     steps {
                         sh '''
-                            echo "-------- Logging into DockerHub --------"
-                            echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin
+                            echo "-------- Logging into AWS ECR --------"
+                            aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
                             echo "-------- Login Successful --------"
 
-                            echo "-------- Pushing Image --------"
-                            docker push rashmikanta/datastore:${App_Version}
+                            echo "-------- Pushing Image to ECR --------"
+                            docker push ${ECR_REPO}:${App_Version}
                             echo "-------- Push Completed --------"
                         '''
                     }
